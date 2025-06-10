@@ -1,49 +1,28 @@
-import { createInterface } from "node:readline";
-import { stdin, stdout } from "node:process";
-import { commandExit } from "./command_exit.js";
-import { commandHelp } from "./command_help.js";
-const rl = createInterface({
-    input: stdin,
-    output: stdout,
-    prompt: "> ",
-});
-export function getCommands() {
-    return {
-        exit: {
-            name: "exit",
-            description: "Exit the Pokedex",
-            callback: commandExit,
-        },
-        help: {
-            name: "help",
-            description: "Displays a help message",
-            callback: commandHelp,
-        }
-        // Add more
-    };
-}
+import { initState } from "./state.js";
+const state = initState();
 export function startREPL() {
-    rl.prompt();
-    rl.on("line", (line) => {
+    state.rl.prompt();
+    // TODO fix so that state.rl.prompt is DRY
+    state.rl
+        .on("line", (line) => {
         const input = line.trim();
         const cleanedInput = cleanInput(input);
-        const commands = getCommands();
-        if (cleanedInput[0] in commands) {
-            // rl.close();
-            commands[cleanedInput[0]].callback(commands);
-            // commandExit();
-            return;
-        }
-        else if (input === "") {
-            rl.prompt();
-            return;
+        // const commands = getCommands();
+        if (cleanedInput.length > 0 && cleanedInput[0] in state.commands) {
+            state.commands[cleanedInput[0]].callback(state);
+            if (cleanedInput[0] !== "exit") {
+                state.rl.prompt();
+            }
         }
         else {
-            console.log("Unknown command");
+            if (input !== "") {
+                console.log("Unknown command");
+            }
+            state.rl.prompt();
         }
         // console.log(`Your command was: ${cleanedInput[0]}`);
-        rl.prompt();
-    }).on("close", () => {
+    })
+        .on("close", () => {
         console.log("REPL closed.");
     });
 }

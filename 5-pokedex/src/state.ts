@@ -2,6 +2,7 @@ import { commandExit } from "./command_exit.js";
 import { commandHelp } from "./command_help.js";
 import { Interface, createInterface } from "readline";
 import { stdin, stdout } from "node:process";
+import { PokeAPI } from "./pokeapi.js";
 
 export type CLICommand = {
   name: string;
@@ -11,6 +12,8 @@ export type CLICommand = {
 export type State = {
   rl: Interface;
   commands: Record<string, CLICommand>;
+  api?: PokeAPI;
+
 };
 
 export function initState(): State {
